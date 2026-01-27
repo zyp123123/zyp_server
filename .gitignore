@@ -10,7 +10,6 @@ reactor_server
 
 # 日志
 *.log
-log/
 
 # 临时文件
 *.swp
