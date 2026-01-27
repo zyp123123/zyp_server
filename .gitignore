@@ -20,3 +20,8 @@ log/
 .vscode/
 .idea/
 
+# 大文件 / 测试资源
+*.mp4
+*.bin
+test/static/
+www/static/
