@@ -1,0 +1,53 @@
+zyp@zyp-VMware:~$ curl -v http://127.0.0.1:9999/static/small.txt
+*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> GET /static/small.txt HTTP/1.1
+> Host: 127.0.0.1:9999
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< Connection: keep-alive
+< Content-Length: 18
+< Accept-Ranges: bytes
+< Content-Type: text/plain
+< 
+Hello HTTP Server
+* Connection #0 to host 127.0.0.1 left intact
+zyp@zyp-VMware:~$ curl -I http://127.0.0.1:9999/static/small.txt
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 18
+Accept-Ranges: bytes
+Content-Type: text/plain
+
+zyp@zyp-VMware:~$ curl -v http://127.0.0.1:9999/static/not_exist.txt
+*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> GET /static/not_exist.txt HTTP/1.1
+> Host: 127.0.0.1:9999
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 404 Not Found
+< Connection: keep-alive
+< Content-Length: 0
+< 
+* Connection #0 to host 127.0.0.1 left intact
+zyp@zyp-VMware:~$ curl -v -H "Connection: close" http://127.0.0.1:9999/static/small.txt
+*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> GET /static/small.txt HTTP/1.1
+> Host: 127.0.0.1:9999
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Connection: close
+> 
+< HTTP/1.1 200 OK
+< Connection: close
+< Content-Length: 18
+< Accept-Ranges: bytes
+< Content-Type: text/plain
+< 
+Hello HTTP Server
+* Closing connection

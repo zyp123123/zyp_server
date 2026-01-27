@@ -1,0 +1,65 @@
+zyp@zyp-VMware:~$ dd if=/dev/urandom \
+   of=/home/zyp/linux/zyp_server/test/upload/1M_upload.bin \
+   bs=1M count=1
+
+dd if=/dev/urandom \
+   of=/home/zyp/linux/zyp_server/test/upload/10M_upload.bin \
+   bs=1M count=10
+输入了 1+0 块记录
+输出了 1+0 块记录
+1048576 字节 (1.0 MB, 1.0 MiB) 已复制，0.0188978 s，55.5 MB/s
+输入了 10+0 块记录
+输出了 10+0 块记录
+10485760 字节 (10 MB, 10 MiB) 已复制，0.0900825 s，116 MB/s
+zyp@zyp-VMware:~$ curl -v \
+  -F "file=@/home/zyp/linux/zyp_server/test/upload/1M_upload.bin" \
+  http://127.0.0.1:9999/upload
+*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> POST /upload HTTP/1.1
+> Host: 127.0.0.1:9999
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Length: 1048793
+> Content-Type: multipart/form-data; boundary=------------------------80PwylQo98m4eXVxgDAKDa
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Connection: keep-alive
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 82
+< 
+* Connection #0 to host 127.0.0.1 left intact
+<h2>Upload Success</h2><ul><li>1M_upload.bin</li></ul><a href='/'>Back to Home</a>zyp@zyp-VMware:~$ 
+zyp@zyp-VMware:~$ curl -v \
+  -F "file1=@/home/zyp/linux/zyp_server/test/upload/1M_upload.bin" \
+  -F "file2=@/home/zyp/linux/zyp_server/test/upload/10M_upload.bin" \
+  http://127.0.0.1:9999/upload
+*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> POST /upload HTTP/1.1
+> Host: 127.0.0.1:9999
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Length: 11534721
+> Content-Type: multipart/form-data; boundary=------------------------YGrYqhufnRHHeFHHA8i6rl
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Connection: keep-alive
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 105
+< 
+* Connection #0 to host 127.0.0.1 left intact
+<h2>Upload Success</h2><ul><li>1M_upload.bin</li><li>10M_upload.bin</li></ul><a href='/'>Back to Home</a>zyp@zyp-VMware:~$ 
+zyp@zyp-VMware:~$ md5sum \
+  /home/zyp/linux/zyp_server/test/upload/1M_upload.bin \
+  /home/zyp/linux/zyp_server/upload/1M_upload.bin
+5acf6a8f33a82e93136f8327fd970f36  /home/zyp/linux/zyp_server/test/upload/1M_upload.bin
+5acf6a8f33a82e93136f8327fd970f36  /home/zyp/linux/zyp_server/upload/1M_upload.bin
+zyp@zyp-VMware:~$ 
+在浏览器中上传文件成功上传到/home/zyp/linux/zyp_server/upload

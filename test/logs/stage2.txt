@@ -1,0 +1,21 @@
+zyp@zyp-VMware:~$ curl -o /tmp/small.txt http://127.0.0.1:9999/static/small.txt
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    18  100    18    0     0   5528      0 --:--:-- --:--:-- --:--:--  6000
+zyp@zyp-VMware:~$ md5sum /home/zyp/linux/zyp_server/test/static/small.txt /tmp/small.txt
+d83ac6d778eef12b1ed05875e50f894f  /home/zyp/linux/zyp_server/test/static/small.txt
+d83ac6d778eef12b1ed05875e50f894f  /tmp/small.txt
+zyp@zyp-VMware:~$ curl -o /tmp/1M.bin http://127.0.0.1:9999/static/1M.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1024k  100 1024k    0     0  56.7M      0 --:--:-- --:--:-- --:--:-- 58.8M
+zyp@zyp-VMware:~$ md5sum /home/zyp/linux/zyp_server/test/static/1M.bin /tmp/1M.bin
+f4412ed383a41bec3c3ac93003e5994f  /home/zyp/linux/zyp_server/test/static/1M.bin
+f4412ed383a41bec3c3ac93003e5994f  /tmp/1M.bin
+zyp@zyp-VMware:~$ curl -o /tmp/100M.bin http://127.0.0.1:9999/static/100M.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  100M  100  100M    0     0  79.0M      0  0:00:01  0:00:01 --:--:-- 79.1M
+zyp@zyp-VMware:~$ md5sum /home/zyp/linux/zyp_server/test/static/100M.bin /tmp/100M.bin
+5ae6ac7fd74aa061dab84ac6a0b140a3  /home/zyp/linux/zyp_server/test/static/100M.bin
+5ae6ac7fd74aa061dab84ac6a0b140a3  /tmp/100M.bin

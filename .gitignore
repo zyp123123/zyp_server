@@ -1,0 +1,22 @@
+# 编译产物
+*.o
+*.out
+*.exe
+
+# 可执行文件
+epoll_server
+epoll_echo_server
+reactor_server
+
+# 日志
+*.log
+log/
+
+# 临时文件
+*.swp
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+

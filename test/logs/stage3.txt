@@ -1,0 +1,75 @@
+zyp@zyp-VMware:~$ curl -v -r 0-1023 http://127.0.0.1:9999/static/100M.bin -o /tmp/part_0_1023.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> GET /static/100M.bin HTTP/1.1
+> Host: 127.0.0.1:9999
+> Range: bytes=0-1023
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 206 Partial Content
+< Connection: keep-alive
+< Content-Length: 1024
+< Content-Range: bytes 0-1023/104857600
+< Accept-Ranges: bytes
+< Content-Type: application/octet-stream
+< 
+{ [1024 bytes data]
+100  1024  100  1024    0     0  67028      0 --:--:-- --:--:-- --:--:-- 73142
+* Connection #0 to host 127.0.0.1 left intact
+zyp@zyp-VMware:~$ dd if=/home/zyp/linux/zyp_server/test/static/100M.bin of=/tmp/expect_0_1023.bin bs=1 count=1024
+输入了 1024+0 块记录
+输出了 1024+0 块记录
+1024 字节 (1.0 kB, 1.0 KiB) 已复制，0.00345451 s，296 kB/s
+zyp@zyp-VMware:~$ md5sum /tmp/expect_0_1023.bin /tmp/part_0_1023.bin
+7e9d55a2c3578d03cb2f175713ab366d  /tmp/expect_0_1023.bin
+7e9d55a2c3578d03cb2f175713ab366d  /tmp/part_0_1023.bin
+zyp@zyp-VMware:~$ curl -v -r 100-199 http://127.0.0.1:9999/static/100M.bin -o /tmp/part_100_199.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 127.0.0.1:9999...
+* Connected to 127.0.0.1 (127.0.0.1) port 9999
+> GET /static/100M.bin HTTP/1.1
+> Host: 127.0.0.1:9999
+> Range: bytes=100-199
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 206 Partial Content
+< Connection: keep-alive
+< Content-Length: 100
+< Content-Range: bytes 100-199/104857600
+< Accept-Ranges: bytes
+< Content-Type: application/octet-stream
+< 
+{ [100 bytes data]
+100   100  100   100    0     0   7961      0 --:--:-- --:--:-- --:--:--  9090
+* Connection #0 to host 127.0.0.1 left intact
+zyp@zyp-VMware:~$ dd if=/home/zyp/linux/zyp_server/test/static/100M.bin of=/tmp/expect_100_199.bin bs=1 skip=100 count=100
+输入了 100+0 块记录
+输出了 100+0 块记录
+100 字节已复制，0.000325089 s，308 kB/s
+zyp@zyp-VMware:~$ md5sum /tmp/expect_100_199.bin /tmp/part_100_199.bin
+4eb2e6bcc9ec81f2202e56352d3f32d2  /tmp/expect_100_199.bin
+4eb2e6bcc9ec81f2202e56352d3f32d2  /tmp/part_100_199.bin
+zyp@zyp-VMware:~$ curl -C - -o /tmp/resume_100M.bin http://127.0.0.1:9999/static/100M.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0^C
+zyp@zyp-VMware:~$ curl -C - -o /tmp/resume_100M.bin http://127.0.0.1:9999/static/100M.bin
+** Resuming transfer from byte position 21766144
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 79.2M  100 79.2M    0     0  67.2M      0  0:00:01  0:00:01 --:--:-- 67.2M
+zyp@zyp-VMware:~$ ^C
+zyp@zyp-VMware:~$ curl -C - -o /tmp/resume_100M.bin http://127.0.0.1:9999/static/100M.bin
+** Resuming transfer from byte position 104857600
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+zyp@zyp-VMware:~$ md5sum /home/zyp/linux/zyp_server/test/static/100M.bin /tmp/resume_100M.bin
+5ae6ac7fd74aa061dab84ac6a0b140a3  /home/zyp/linux/zyp_server/test/static/100M.bin
+5ae6ac7fd74aa061dab84ac6a0b140a3  /tmp/resume_100M.bin 
+浏览器打开test.mp4快速点击进度条秒跳

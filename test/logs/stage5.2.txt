@@ -1,0 +1,40 @@
+zyp@zyp-VMware:~$ wrk -t4 -c100 -d30s http://127.0.0.1:9999/static/small.txt
+Running 30s test @ http://127.0.0.1:9999/static/small.txt
+  4 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    44.97ms    2.41ms  60.14ms   74.01%
+    Req/Sec   557.48     57.62   757.00     80.92%
+  66731 requests in 30.09s, 8.22MB read
+Requests/sec:   2217.78
+Transfer/sec:    279.73KB
+zyp@zyp-VMware:~$ 
+watch -n 1 "ss -ant | grep 9999 | wc -l" 在开始后涨至202结束后降至3，最后将为1
+top -p $(pidof reactor_server) 在运行期间大约13%，结束后下降为0
+
+zyp@zyp-VMware:~$ wrk -t4 -c20 -d30s http://127.0.0.1:9999/static/100M.bin
+Running 30s test @ http://127.0.0.1:9999/static/100M.bin
+  4 threads and 20 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   263.29ms  155.48ms   1.30s    71.97%
+    Req/Sec    15.52      7.68    49.00     68.15%
+  1798 requests in 30.11s, 176.17GB read
+Requests/sec:     59.72
+Transfer/sec:      5.85GB
+zyp@zyp-VMware:~$ 
+watch -n 1 "ss -ant | grep 9999 | wc -l" 在开始后涨至42结束后降至4，最后将为1
+top -p $(pidof reactor_server) 在运行期间大约70%，结束后下降为0
+
+zyp@zyp-VMware:~$ wrk -t4 -c50 -d30s \
+  -H "Range: bytes=0-1023" \
+  http://127.0.0.1:9999/static/100M.bin
+Running 30s test @ http://127.0.0.1:9999/static/100M.bin
+  4 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    44.96ms    2.30ms  52.05ms   73.66%
+    Req/Sec   267.71     29.56   363.00     80.58%
+  32060 requests in 30.08s, 36.79MB read
+Requests/sec:   1065.83
+Transfer/sec:      1.22MB
+zyp@zyp-VMware:~$ 
+watch -n 1 "ss -ant | grep 9999 | wc -l" 在开始后涨至98结束后降至2，最后将为1
+top -p $(pidof reactor_server) 在运行期间大约7%，结束后下降为0

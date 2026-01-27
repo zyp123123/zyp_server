@@ -1,0 +1,18 @@
+for i in {1..1000}; do
+  curl -s http://127.0.0.1:9999/static/small.txt > /dev/null
+done
+watch -n 1 "ss -ant | grep 9999 | wc -l" 持续增加到1001，一段时间后降至1
+top在cpu涨至大约9%后下降
+
+for i in {1..500}; do
+  curl -s -H "Connection: close" \
+    http://127.0.0.1:9999/static/small.txt > /dev/null
+done
+watch -n 1 "ss -ant | grep 9999 | wc -l" 持续增加到501，一段时间后降至1
+top在cpu涨至大约5%后下降
+
+for i in {1..20}; do
+  curl -s http://127.0.0.1:9999/static/100M.bin > /dev/null
+done
+watch -n 1 "ss -ant | grep 9999 | wc -l" 持续增加到21，一段时间后降至1
+top在cpu涨至大约9%后下降
