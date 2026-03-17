@@ -118,3 +118,63 @@ echo "static_path=./www/static" >> server.conf
 
 
 打开浏览器访问：http://你的服务器IP:9999/ 即可看到文件列表页面，并支持文件预览、下载与大文件上传。
+
+
+## 📊 性能测试与功能验证 (Performance & Testing)
+
+本项目经过了严格的功能校验、稳定性监控与极限压力测试，各项指标均表现优异，无任何资源泄漏。
+
+### 1. 功能与完整性验证 (100% 校验通过)
+* **基础协议与长短连接**：通过 `curl` 验证了 `GET`/`HEAD` 请求、`404` 路由拦截，`Connection: keep-alive` 与 `close` 的状态机流转准确无误。
+* **大文件分发与数据完整性**：18B、1MB、100MB 级别文件的并发下载，通过 `md5sum` 校验，数据一致性达到 **100%**，无任何字节丢失或乱序。
+* **高阶特性验证**：
+    * **断点续传 (Range)**：完美支持 `Range: bytes=x-y`，切片下载数据的 MD5 与 `dd` 命令物理截取的文件完全一致，支持 `curl -C -` 随意中断与恢复。
+    * **大文件流式上传 (Multipart)**：支持 `Expect: 100-continue` 机制，成功实现 1MB 单文件及 1M+10M 多文件的并发流式解析上传，落盘文件 MD5 校验无误。
+
+### 2. 健壮性与稳定性监控 (防泄漏防崩溃)
+利用 `shell` 脚本配合 `ss -ant` (Socket 监控) 与 `top` (系统资源监控) 进行了严苛的生命周期测试：
+* **零连接泄漏 (FD Leak Free)**：经过数千次高并发短连接（`Connection: close`）与大文件下载冲击，网络连接数能迅速随着请求释放，最终精准回落至初始监听状态（1 个 Listen FD），定时器队列资源回收完美闭环。
+* **极佳的 CPU 调度**：高并发瞬间 CPU 利用率合理上升，请求处理完毕后立刻回落至 0% idle 状态，无任何死循环或 CPU 空转（Busy Loop）现象。
+
+### 3. 极限压力测试 (基于 wrk)
+测试环境：本地回环网卡 (127.0.0.1)，避开了物理带宽瓶颈，直测程序极致处理能力。
+
+| 测试场景 | 线程数 | 并发连接数 | 平均延迟 (Latency) | QPS (Req/Sec) | 吞吐量 (Transfer/sec) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **小文件高频请求** (`small.txt`) | 4 | 100 | 44.97 ms | **~2217** | 279.73 KB/s |
+| **大文件极限下发** (`100M.bin`) | 4 | 20 | 263.29 ms | ~59 | **5.85 GB/s** 🚀 |
+| **高频断点续传** (`Range: 0-1023`) | 4 | 50 | 44.96 ms | **~1065** | 1.22 MB/s |
+
+> **💡 性能分析**：在 100MB 大文件并发下发的压测中，吞吐量达到了惊人的 **5.85 GB/s**。这归功于底层 `sendfile` 零拷贝技术的极致压榨，以及高水位背压（Backpressure）机制对 `EPOLLOUT` 的精准控制，使得数据直接在内核态高速流转。
+
+<details>
+<summary><b>👉 点击查看原始测试日志 (Raw Test Logs)</b></summary>
+
+```text
+# 1. 小文件高频测试
+$ wrk -t4 -c100 -d30s [http://127.0.0.1:9999/static/small.txt](http://127.0.0.1:9999/static/small.txt)
+  4 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    44.97ms    2.41ms  60.14ms   74.01%
+    Req/Sec   557.48     57.62   757.00     80.92%
+  66731 requests in 30.09s, 8.22MB read
+Requests/sec:   2217.78
+
+# 2. 100MB 大文件极限零拷贝测试
+$ wrk -t4 -c20 -d30s [http://127.0.0.1:9999/static/100M.bin](http://127.0.0.1:9999/static/100M.bin)
+  4 threads and 20 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   263.29ms  155.48ms   1.30s    71.97%
+    Req/Sec    15.52      7.68    49.00     68.15%
+  1798 requests in 30.11s, 176.17GB read
+Requests/sec:     59.72
+Transfer/sec:      5.85GB  <-- 极高吞吐量
+
+# 3. 频繁断点续传测试
+$ wrk -t4 -c50 -d30s -H "Range: bytes=0-1023" [http://127.0.0.1:9999/static/100M.bin](http://127.0.0.1:9999/static/100M.bin)
+  4 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    44.96ms    2.30ms  52.05ms   73.66%
+    Req/Sec   267.71     29.56   363.00     80.58%
+  32060 requests in 30.08s, 36.79MB read
+Requests/sec:   1065.83
